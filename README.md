@@ -1,7 +1,7 @@
 
 # Shade
 ## The Website Is Live! <br>
-[Here](https://shade-rx.onrender.com) you go!  
+ 
 
 
 Shade - (A Social Media Website with Anonymous Username)
@@ -20,7 +20,7 @@ Shade is a social media platform with features like the ability to create an acc
 Clone the project
 
 ```bash
-  git clone https://github.com/rajeev-30/Shade.git
+  git clone https://github.com/mdshyed/X-clone
 ```
 
 Go to the project directory

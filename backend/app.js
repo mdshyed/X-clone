@@ -6,6 +6,10 @@ import postRoute from "./routes/post.route.js"
 import notificationRoute from "./routes/notification.route.js"
 import cors from 'cors'
 import path from "path";
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 dotenv.config({
     path: "./.env",
@@ -15,7 +19,7 @@ const app = express();
 const port = process.env.PORT || 4000
 
 //cors
-const allowedOrigins = ["http://localhost:8000", "http://localhost:5173", "https://shade-rx.onrender.com"];
+const allowedOrigins = ["http://localhost:8000", "http://localhost:5173", "http://localhost:3001", "http://127.0.0.1:51290", "https://shade-rx.onrender.com"];
 const corsOptions = {
     origin: (origin, callback) => {
         // Allow requests with no origin (like mobile apps, curl requests)
@@ -37,17 +41,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json({ limit: '5mb' }));
 app.use(cookieParser());
 
+// Serve uploaded files locally (fallback when S3 not configured)
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 //api
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/post", postRoute);
 app.use("/api/v1/notification", notificationRoute);
 
 //serving frontend
-const __dirname = path.resolve();
-
-app.use(express.static(path.join(__dirname, "/frontend/dist")));
+app.use(express.static(path.join(__dirname, "../frontend/dist")));
 app.get("*", (req, res) => {
-    res.sendFile(path.resolve(__dirname, "frontend", "dist", "index.html"));
+    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
 })
 
 

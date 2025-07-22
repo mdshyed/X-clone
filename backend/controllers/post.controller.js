@@ -1,7 +1,7 @@
 import { Notification } from "../models/notification.model.js";
 import { Post } from "../models/post.model.js";
 import { User } from "../models/user.model.js";
-import {v2 as cloudinary} from "cloudinary"
+import { uploadToS3, deleteFromS3 } from '../utils/s3.js'
 
 
 //Create post
@@ -28,8 +28,7 @@ export const createPost = async(req,res) =>{
         }
 
         if(img) {
-            const uploadedRes = await cloudinary.uploader.upload(img);
-            img = uploadedRes.secure_url;
+            img = await uploadToS3(img, `post-${Date.now()}.jpg`);
         }
         text = text.trim();
         await Post.create({
@@ -68,7 +67,7 @@ export const deletePost = async(req, res)=>{
 
         if(post.img) {
             const imgId = post.img.split('/').pop().split('.')[0];
-            await cloudinary.uploader.destroy(imgId)
+            await deleteFromS3(post.img)
         }
 
         await Post.findByIdAndDelete(id);
