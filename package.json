@@ -7,7 +7,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon backend/index.js",
-    "start": "node backend/index.js",
+    "start": "NODE_ENV=production node backend/index.js",
     "build": "npm install && cd frontend && npm install && npm run build && cd .. && ls -la frontend/dist"
   },
   "keywords": [],

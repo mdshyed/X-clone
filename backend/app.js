@@ -50,9 +50,20 @@ app.use("/api/v1/post", postRoute);
 app.use("/api/v1/notification", notificationRoute);
 
 //serving frontend
-app.use(express.static(path.join(__dirname, "../frontend/dist")));
+// Handle both local development and Render deployment paths
+const frontendDistPath = process.env.NODE_ENV === 'production' 
+    ? path.join(process.cwd(), 'frontend/dist')
+    : path.join(__dirname, "../frontend/dist");
+
+console.log('Frontend dist path:', frontendDistPath);
+console.log('Current working directory:', process.cwd());
+console.log('__dirname:', __dirname);
+
+app.use(express.static(frontendDistPath));
 app.get("*", (req, res) => {
-    res.sendFile(path.join(__dirname, "../frontend", "dist", "index.html"));
+    const indexPath = path.join(frontendDistPath, "index.html");
+    console.log('Trying to serve index.html from:', indexPath);
+    res.sendFile(indexPath);
 })
 
 
