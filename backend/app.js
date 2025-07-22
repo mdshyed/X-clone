@@ -50,21 +50,59 @@ app.use("/api/v1/post", postRoute);
 app.use("/api/v1/notification", notificationRoute);
 
 //serving frontend
-// Handle both local development and Render deployment paths
-const frontendDistPath = process.env.NODE_ENV === 'production' 
-    ? path.join(process.cwd(), 'frontend/dist')
-    : path.join(__dirname, "../frontend/dist");
+// Multiple path attempts for different deployment environments
+const fs = require('fs');
+const possiblePaths = [
+    path.join(process.cwd(), 'frontend/dist'),
+    path.join(__dirname, '../frontend/dist'),
+    path.join(process.cwd(), 'dist'),
+    path.join(__dirname, '../dist'),
+    path.join(process.cwd(), 'src/frontend/dist')
+];
 
-console.log('Frontend dist path:', frontendDistPath);
+let frontendDistPath = null;
+let indexHtmlPath = null;
+
+console.log('Searching for frontend in these paths:', possiblePaths);
 console.log('Current working directory:', process.cwd());
 console.log('__dirname:', __dirname);
 
-app.use(express.static(frontendDistPath));
-app.get("*", (req, res) => {
-    const indexPath = path.join(frontendDistPath, "index.html");
-    console.log('Trying to serve index.html from:', indexPath);
-    res.sendFile(indexPath);
-})
+// Find the correct path that exists
+for (const testPath of possiblePaths) {
+    const testIndexPath = path.join(testPath, 'index.html');
+    try {
+        if (fs.existsSync(testIndexPath)) {
+            frontendDistPath = testPath;
+            indexHtmlPath = testIndexPath;
+            console.log('✅ Found frontend at:', frontendDistPath);
+            break;
+        } else {
+            console.log('❌ Not found at:', testPath);
+        }
+    } catch (err) {
+        console.log('❌ Error checking:', testPath, err.message);
+    }
+}
+
+if (frontendDistPath) {
+    app.use(express.static(frontendDistPath));
+    app.get("*", (req, res) => {
+        console.log('Serving index.html from:', indexHtmlPath);
+        res.sendFile(indexHtmlPath);
+    });
+} else {
+    console.error('🚨 Frontend dist folder not found in any location!');
+    console.error('Searched paths:', possiblePaths);
+    app.get("*", (req, res) => {
+        res.status(404).json({ 
+            error: 'Frontend build not found', 
+            message: 'The frontend build files could not be located',
+            searchedPaths: possiblePaths,
+            cwd: process.cwd(),
+            dirname: __dirname
+        });
+    });
+}
 
 
 //serving backend
