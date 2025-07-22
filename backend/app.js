@@ -51,7 +51,7 @@ app.use("/api/v1/notification", notificationRoute);
 
 //serving frontend
 // Multiple path attempts for different deployment environments
-const fs = require('fs');
+import fs from 'fs';
 const possiblePaths = [
     path.join(process.cwd(), 'frontend/dist'),
     path.join(__dirname, '../frontend/dist'),
